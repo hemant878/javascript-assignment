@@ -1,9 +1,9 @@
 const BaseError = require("./BaseError")
 
-class NotFound extends BaseError{
+class NotAuthorized extends BaseError{
    constructor(message){
     super(message,"Error-Not-Found",404)
    }
 }
 
-module.exports=NotFound
+module.exports=NotAuthorized

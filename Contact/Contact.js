@@ -1,4 +1,5 @@
 const ContactInfo = require("./ContactInfo")
+const NotFound=require("./NotFound")
 
 class Contact {
     static Id = 0
@@ -28,41 +29,57 @@ class Contact {
     }
 
     updateContactInfo(contactInfoId, newValue) {
+       try {
+            if (typeof contactInfoId != "number") {
+                throw new NotFound("user not found")
+            }
+            let [indexOfContactInfo, isContactInfoExist] = this.findContactInfo(contactInfoId)
+            if (!isContactInfoExist) {
 
+                throw new NotFound("user not found")
+            }
+            this.contactInfo[indexOfContactInfo].updateContactInfo(newValue)
+            return this.contactInfo[indexOfContactInfo]
         
-        if (typeof contactInfoId != "number") {
-            return "invalid user Id"
-        }
-        let [indexOfContactInfo, isContactInfoExist] = this.findContactInfo(contactInfoId)
-        if (!isContactInfoExist) {
+       } catch (error) {
+         return error
+       }
+        
 
-            return "contact info does not exist"
-        }
-        this.contactInfo[indexOfContactInfo].updateContactInfo(newValue)
-        return this.contactInfo[indexOfContactInfo]
     }
 
     deleteContactInfo(contactInfoId){
-        if (typeof contactInfoId != "number") {
-            return "invalid user Id"
+        try {
+            if (typeof contactInfoId != "number") {
+                throw new NotFound("user not found")
+            }
+            let [indexOfContactInfo, isContactInfoExist] = this.findContactInfo(contactInfoId)
+            if (!isContactInfoExist) {
+                throw new NotFound("user not found")
+            }
+            this.contactInfo.splice(indexOfContactInfo, 1)
+            return this.contactInfo
+            
+        } catch (error) {
+            return error
         }
-        let [indexOfContactInfo, isContactInfoExist] = this.findContactInfo(contactInfoId)
-        if (!isContactInfoExist) {
-            return "contact info does not exist"
-        }
-        this.contactInfo.splice(indexOfContactInfo, 1)
-        return this.contactInfo
+
     }
 
     getContactInfoById(contactInfoId){
-        if (typeof contactInfoId != "number") {
-            return "invalid user Id"
+        try {
+            if (typeof contactInfoId != "number") {
+                throw new NotFound("user not found")
+            }
+            let [indexOfContactInfo, isContactInfoExist] = this.findContactInfo(contactInfoId)
+            if (!isContactInfoExist) {
+                throw new NotFound("user not found")
+            }
+            return this.contactInfo[indexOfContactInfo]
+        } catch (error) {
+            return error
         }
-        let [indexOfContactInfo, isContactInfoExist] = this.findContactInfo(contactInfoId)
-        if (!isContactInfoExist) {
-            return "contact info does not exist"
-        }
-        return this.contactInfo[indexOfContactInfo]
+
     }
 }
 

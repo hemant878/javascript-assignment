@@ -1,5 +1,6 @@
 const Contact = require("./Contact")
 const NotFound = require("./NotFound")
+const NotAuthorized = require("./NotAuthorized")
 class User {
     static Id = 0;
     static allUsers = []
@@ -45,34 +46,50 @@ class User {
     }
 
     getAllUsers() {
-        if (!this.isAdmin) {
-            return "unauthorised"
-        }
-        return User.allUsers
-    }
-
-    findUser(userID) {
-        if (!this.isAdmin) {
-            return "unauthorised"
-        }
-        for (let index = 0; index < User.allUsers.length; index++) {
-            if (userID == User.allUsers[index].Id) {
-                return [index, true]
+        try {
+            if (!this.isAdmin) {
+                throw new NotAuthorized("user not authorized")
             }
+            return User.allUsers
+            
+        } catch (error) {
+             return error
         }
-        return [-1, false]
+       
+    }
+     
+    findUser(userID) {
+
+        try {
+            if (!this.isAdmin) {
+                throw new NotAuthorized("user not authorized")
+            }
+            for (let index = 0; index < User.allUsers.length; index++) {
+                if (userID == User.allUsers[index].Id) {
+                    return [index, true]
+                }
+            }
+            return [-1, false]
+            
+        } catch (error) {
+            return error
+        }
+       
     }
 
     updateUser(userId, parameter, newValue) {
+       try {
+        
         if (typeof userId != "number") {
-            return "invalid user Id"
+            throw new NotFound("user not found")
         }
         if (!this.isAdmin) {
-            return "unauthorised"
+            throw new NotAuthorized("user not authorized")
         }
         let [indexOfUser, isUserExist] = this.findUser(userId)
+
         if (!isUserExist) {
-            return "user does not exist"
+            throw new NotAuthorized("user not authorized")
         }
         switch (parameter) {
             case "fullName": if (typeof newValue != "string") { return "invalid name" }
@@ -84,31 +101,51 @@ class User {
             case "country": if (typeof newValue != "string") { return "invalid country" }
                 User.allUsers[indexOfUser].country = newValue
                 return User.allUsers[indexOfUser]
-            default: return "Invalid Parameter"
+            default: throw new NotFound("user not Found")
         }
+        
+       } catch (error) {
+             return error
+       }
+
     }
 
+
     deleteUser(userId) {
-        if (typeof userId != "number") {
-            return "invalid user Id"
+        try {
+            if (typeof userId != "number") {
+                throw new NotFound("user not Found")
+            }
+            if (!this.isAdmin) {
+                throw new NotAuthorized("user not authorized")
+            }
+            let [indexOfUser, isUserExist] = this.findUser(userId)
+
+            if (!isUserExist) {
+                throw new NotFound("user not Found")
+            }
+            User.allUsers.splice(indexOfUser, 1)
+            return User.allUsers
+            
+        } catch (error) {
+            return error
         }
-        if (!this.isAdmin) {
-            return "unauthorised"
-        }
-        let [indexOfUser, isUserExist] = this.findUser(userId)
-        if (!isUserExist) {
-            return "User does not exist"
-        }
-        User.allUsers.splice(indexOfUser, 1)
-        return User.allUsers
+        
+       
     }
 
     createContact(fullName) {
-        if (typeof fullName != "string") {
-            return "invalid name"
+        try {
+            if (typeof fullName != "string") {
+                throw new NotFound("user not Found")
+            }
+            let createdContact = new Contact(fullName)
+            this.contacts.push(createdContact)
+            
+        } catch (error) {
+            return error
         }
-        let createdContact = new Contact(fullName)
-        this.contacts.push(createdContact)
+       
     }
 
     getAllContact() {
@@ -127,15 +164,16 @@ class User {
     updateContact(contactId, newValue) {
      try{    
         if (typeof contactId != "number") {
-            throw new Error("invalid user Id")
+            throw new NotFound("invalid user Id")
         }
         let [indexOfContact, isContactExist] = this.findContact(contactId)
+
         if (!isContactExist) {
-            throw new Error("contact does not exist")
+            throw new NotFound("contact does not exist")
             
         }
         if (typeof newValue != "string") {
-            throw new Error("invalid name")
+            throw new NotFound("invalid name")
            
         }
         this.contacts[indexOfContact].fullName = newValue
@@ -147,106 +185,161 @@ class User {
     }
 
     deleteContact(contactId) {
+      try {
         if (typeof contactId != "number") {
-            return "invalid user Id"
+            throw new NotFound("user not found")
         }
         let [indexOfContact, isContactExist] = this.findContact(contactId)
         if (!isContactExist) {
-            return "contact does not exist"
+            throw new NotFound("user not found")
         }
         this.contacts.splice(indexOfContact, 1)
+        
+      } catch (error) {
+          return error
+      }
+
+       
     }
 
     createContactInfo(contactId, typeOfContact, valueOfContact) {
-        if (typeof contactId != "number") {
-            return "invalid user Id"
-        }
-        let [indexOfContact, isContactExist] = this.findContact(contactId)
-        if (!isContactExist) {
-            return "contact does not exist"
-        }
-        this.contacts[indexOfContact].createContactInfo(typeOfContact, valueOfContact)
-        return this.contacts[indexOfContact]
+       try {
+           
+            if (typeof contactId != "number") {
+                throw new NotFound("user not found")
+            }
+            let [indexOfContact, isContactExist] = this.findContact(contactId)
+            if (!isContactExist) {
+                throw new NotFound("user not found")
+            }
+            this.contacts[indexOfContact].createContactInfo(typeOfContact, valueOfContact)
+            return this.contacts[indexOfContact]
+        
+       } catch (error) {
+          return error
+       }
+
     }
 
     getAllContactInfo(contactId) {
-        if (typeof contactId != "number") {
-            return "invalid user Id"
+        try {
+            if (typeof contactId != "number") {
+                throw new NotFound("user not found")
+            }
+            let [indexOfContact, isContactExist] = this.findContact(contactId)
+            if (!isContactExist) {
+                throw new NotFound("user not found")
+            }
+            this.contacts[indexOfContact].getAllContactInfo()
+            return this.contacts[indexOfContact]
+            
+        } catch (error) {
+            return error
         }
-        let [indexOfContact, isContactExist] = this.findContact(contactId)
-        if (!isContactExist) {
-            return "contact does not exist"
-        }
-        this.contacts[indexOfContact].getAllContactInfo()
-        return this.contacts[indexOfContact]
+        
     }
 
     updateContactInfo(contactId, contactInfoId, newValue) {
-        if (typeof contactId != "number") {
-            return "invalid user Id"
+        try {
+            if (typeof contactId != "number") {
+                throw new NotFound("user not found")
+            }
+            let [indexOfContact, isContactExist] = this.findContact(contactId)
+            if (!isContactExist) {
+                throw new NotFound("user not found")
+            }
+            this.contacts[indexOfContact].updateContactInfo(contactInfoId, newValue)
+            return this.contacts[indexOfContact]
+            
+        } catch (error) {
+            return error
         }
-        let [indexOfContact, isContactExist] = this.findContact(contactId)
-        if (!isContactExist) {
-            return "contact does not exist"
-        }
-        this.contacts[indexOfContact].updateContactInfo(contactInfoId, newValue)
-        return this.contacts[indexOfContact]
+
     }
 
     deleteContactInfo(contactId, contactInfoId){
+      try {
         if (typeof contactId != "number") {
-            return "invalid user Id"
+            throw new NotFound("user not found")
         }
         let [indexOfContact, isContactExist] = this.findContact(contactId)
         if (!isContactExist) {
-            return "contact does not exist"
+            throw new NotFound("user not found")
         }
         this.contacts[indexOfContact].deleteContactInfo(contactInfoId)
         return this.contacts[indexOfContact]
+        
+      } catch (error) {
+          return error
+      }
+
+
     }
 
     getUserById(userId){
-        if(typeof userId != "number"){
-            return "Invalid number"
+        try {
+            if(typeof userId != "number"){
+                throw new NotFound("user not found")
+            }
+            let [indexOfUser, isUserExist] = this.findUser(userId)
+            if(!isUserExist){
+                throw new NotFound("user not found")
+            }
+            return User.allUsers[indexOfUser]
+            
+        } catch (error) {
+            return error
         }
-        let [indexOfUser, isUserExist] = this.findUser(userId)
-        if(!isUserExist){
-            return "User does not exist"
-        }
-        return User.allUsers[indexOfUser]
+
     }
 
     getContactById(contactId){
-        if(typeof contactId != "number"){
-            return "Invalid number"
-        }
-        let [indexOfContact, isContactExist] = this.findContact(contactId)
-        if(!isContactExist){
-            return "User does not exist"
-        }
-        return this.contacts[indexOfContact]
+       try {
+            if(typeof contactId != "number"){
+                throw new NotFound("user not found")
+            }
+            let [indexOfContact, isContactExist] = this.findContact(contactId)
+            if(!isContactExist){
+                throw new NotFound("user not found")
+            }
+            return this.contacts[indexOfContact]
+        
+       } catch (error) {
+          return error
+       }
+
+
     }
 
     getContactInfoById(contactId, contactInfoId){
-        if(typeof contactId != "number"){
-            return "Invalid number"
+        try {
+            if(typeof contactId != "number"){
+                throw new NotFound("user not found")
+            }
+            let [indexOfContact, isContactExist] = this.findContact(contactId)
+            if(!isContactExist){
+                throw new NotFound("user not found")
+            }
+            return this.contacts[indexOfContact].getContactInfoById(contactInfoId)
+            
+        } catch (error) {
+            return error
         }
-        let [indexOfContact, isContactExist] = this.findContact(contactId)
-        if(!isContactExist){
-            return "User does not exist"
-        }
-        return this.contacts[indexOfContact].getContactInfoById(contactInfoId)
+       
     }
 }
 
-let a = User.newAdmin(99, "M", "IND")
+let a = User.newAdmin(22, "M", "IND")
 // let u1 = a.newUser("sarvesh", "M", "IND")
+// let u2 = a.newUser("mohan", "M", "IND")
 
 
-// u1.createContact("omkar")
-// u1.createContact("rohan")
+// // u1.createContact("omkar")
+// u2.createContact("rohan")
+// u2.updateContact(0,"hemant")
 
-// u1.createContactInfo(0, "mobile", 7738530483)
+// // u1.createContactInfo(0, "mobile", 7738530483)
 console.log(a);
+// updateContact()
 // console.log(u1.getContactInfoById(0,0));
 // console.log(u1.updateContact(0,99));
